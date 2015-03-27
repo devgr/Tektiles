@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% load staticfiles %}
+
+    <style type="text/css">
+        span.asteriskField {
+            display: none;
+        }
+    </style>
+
+    <div class="content-section-a">
+        {% if notice %}
+            <div class="container">
+                <h4>
+                    {{ notice }}
+                </h4>
+            </div>
+        {% endif %}
+
+        <div class="container">
+            <h3>{{ title }}</h3>
+            {% block main_content %}{% endblock %}
+        </div>
+    </div>
+
+{% endblock %}
