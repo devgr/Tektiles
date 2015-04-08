@@ -11,6 +11,9 @@ from copy import deepcopy
 from django.core import serializers
 from django.utils import timezone
 from django.conf import settings
+import requests
+import xml.etree.ElementTree as ET
+import re
 
 #### need to initialize the cart here so it is accesible initially
 def webstore(request,id):
@@ -308,3 +311,156 @@ def payment(request):
 	#return render_to_response('store/shop-homepage.html',{'success' : True},context)
 	#return webstore(request, "Fiber Arts")
 	return redirect('webstore', id='Fiber Arts')
+# ups
+def ups_calculate(request):
+    strAccessLicenseNumber = "CCD014DD4CB4AC62"
+    strUserId = "jgriner0918"
+    strPassword = "From1248"
+    strShipperNumber = "R06535"
+    strShipperZip = "37167"
+    url = "https://www.ups.com/ups.app/xml/Rate"
+    strDefaultServiceCode = "03" #Ground Shipping
+    shippingtype = request.GET['varShipping']
+    if shippingtype == '1DM':
+        strDefaultServiceCode = '14'
+    elif shippingtype == '1DA':
+        strDefaultServiceCode = '01'
+    elif shippingtype == '1DP':
+        strDefaultServiceCode = '13'
+    elif shippingtype == '2DM':
+        strDefaultServiceCode = '59'
+    elif shippingtype == '2DA':
+        strDefaultServiceCode = '02'
+    elif shippingtype == '3DS':
+        strDefaultServiceCode = '12'
+    elif shippingtype == 'GND':
+        strDefaultServiceCode = '03'
+    
+    strDestinationZip = request.GET['varZip']
+    weight = "1"
+    data = """<?xml version=\"1.0\"?>
+        <AccessRequest xml:lang=\"en-US\">
+        <AccessLicenseNumber>%s</AccessLicenseNumber>
+        <UserId>%s</UserId>
+        <Password>%s</Password>
+        </AccessRequest>
+        <?xml version=\"1.0\"?>
+        <RatingServiceSelectionRequest xml:lang=\"en-US\">
+        <Request>
+        <TransactionReference>
+        <CustomerContext>Bare Bones Rate Request</CustomerContext>
+        <XpciVersion>1.0001</XpciVersion>
+        </TransactionReference>
+        <RequestAction>Rate</RequestAction>
+        <RequestOption>Rate</RequestOption>
+        </Request>
+        <PickupType>
+        <Code>01</Code>
+        </PickupType>
+        <Shipment>
+        <Shipper>
+        <Address>
+        <PostalCode>%s</PostalCode>
+        <CountryCode>US</CountryCode>
+        </Address>
+        <ShipperNumber>%s</ShipperNumber>
+        </Shipper>
+        <ShipTo>
+        <Address>
+        <PostalCode>%s</PostalCode>
+        <CountryCode>US</CountryCode>
+        <ResidentialAddressIndicator/>
+        </Address>
+        </ShipTo>
+        <ShipFrom>
+        <Address>
+        <PostalCode>%s</PostalCode>
+        <CountryCode>US</CountryCode>
+        </Address>
+        </ShipFrom>
+        <Service>
+        <Code>%s</Code>
+        </Service>
+        <Package>
+        <PackagingType>
+        <Code>02</Code>
+        </PackagingType>
+        <Dimensions>
+        <UnitOfMeasurement>
+        <Code>IN</Code>
+        </UnitOfMeasurement>
+        <Length>12</Length>
+        <Width>6</Width>
+        <Height>36</Height>
+        </Dimensions>
+        <PackageWeight>
+        <UnitOfMeasurement>
+        <Code>LBS</Code>
+        </UnitOfMeasurement>
+        <Weight>%s</Weight>
+        </PackageWeight>
+        </Package>
+        </Shipment>
+        </RatingServiceSelectionRequest>
+        """ % (strAccessLicenseNumber,strUserId,strPassword,strShipperZip,strShipperNumber,strDestinationZip,strShipperZip,strDefaultServiceCode,weight)
+    r = requests.post(url,data)
+    rate = ""
+    if r.status_code == requests.codes.ok:
+        root = ET.fromstring(r.text)
+        if root is None:
+            rate_value = ""
+        else:
+            rate = root.find('RatedShipment/TotalCharges/MonetaryValue')
+    if rate is None:
+        return HttpResponse("")
+    else:
+        return HttpResponse(rate.text)
+
+def usps_calculate(request):
+    userName = "050TEXTI6311"
+    orig_zip = "37167"
+    varZip = request.GET['varZip']
+    varShipping = "PRIORITY"#request.GET.get('varShipping')
+    if varZip is None:
+        return HttpResponse("")
+    else:
+        result = re.match("^[0-9]{5}(?:-[0-9]{4})?$", varZip)
+        if result is None:
+            return HttpResponse("InvalidateZip")
+        else:
+            dest_zip = varZip
+    if varShipping is None:
+        return HttpResponse("InvalidateShipping")
+    else:
+        ship = varShipping
+    weight = "2"
+    url = "http://Production.ShippingAPIs.com/ShippingAPI.dll"
+    data = """API=RateV4&XML=
+        <RateV4Request USERID=\"%s\">
+        <Package ID=\"1ST\">
+        <Service>%s</Service>
+        <ZipOrigination>%s</ZipOrigination>
+        <ZipDestination>%s</ZipDestination>
+        <Pounds>%s</Pounds>
+        <Ounces>0</Ounces>
+        <Container>Variable</Container>
+        <Size>REGULAR</Size>
+        <Length>18</Length>
+        <Height>4</Height>
+        <Girth>12</Girth>
+        <Machinable>TRUE</Machinable>
+        </Package>
+        </RateV4Request>""" % (userName,ship,orig_zip,dest_zip,weight)
+    r = requests.post(url,data)
+    rate = ""
+    if r.status_code == requests.codes.ok:
+        root = ET.fromstring(r.text)
+        if root is None:
+            rate_value = ""
+        else:
+            rate = root.find('Package/Postage/Rate')
+    if rate is None:
+        return HttpResponse("")
+    else:
+        return HttpResponse(rate.text)
+
