@@ -259,76 +259,63 @@
 		<button id="calcShipping" type="button" class="btn btn-success" style="margin-left:25px;">Calculate Shipping</button>
 		<!-- End Changes 11/15 Brandon -->
 
-<script>
+    <script>
     $(document).ready(function(){
-                      $("#calcShipping").click(function(){
-                                               var ship_carrier = $("#ship_carrier").val();
-                                               var request_type = "";
-                                               if(ship_carrier=="UPS"){
-                                               request_type = "ups_calculate";
-                                               }else if(ship_carrier=="USPS"){
-                                               request_type = "usps_calculate";
-                                               }else{
-                                               return;
-                                               }
-                                               var zip = $("#ship_zipCode").val();
-                                               console.log(zip);
+        $("#calcShipping").click(function(){
+                var ship_carrier = $("#ship_carrier").val();
+                var request_type = "";
+                if(ship_carrier=="UPS"){
+                    request_type = "ups_calculate";
+                }else if(ship_carrier=="USPS"){
+                    request_type = "usps_calculate";
+                }else{
+                    return;
+                }
+                var zip = $("#ship_zipCode").val();
+                //console.log(zip);
+                var shipping = $("#ship_method").val();
+                //console.log(shipping);
                                                
-                                               var shipping = $("#ship_method").val();
-                                               console.log(shipping);
+                // Ajax to php server and fill in shipping cost
                                                
+                // this is a temporary version that calls the php script from a different domain, the php script should eventually
+                // be rewritten in python and be handled in Django, this just gives a real result in the meantime
                                                
-                                               // Ajax to php server and fill in shipping cost
-                                               
-                                               // this is a temporary version that calls the php script from a different domain, the php script should eventually
-                                               // be rewritten in python and be handled in Django, this just gives a real result in the meantime
-                                               
-                                               if (zip=="")
-                                               {
-                                               document.getElementById("ship_cost").value="Please enter a valid zipcode";
-                                               return;
-                                               }
-                                               var url = "http://127.0.0.1:8000/webstore/"+request_type;
-                                               $.get(url, {varZip: zip, varShipping: shipping},
-                                                     function (cost) {
+                if (zip==""){
+                    document.getElementById("ship_cost").value="Please enter a valid zipcode";
+                    return;
+                }
+                var url = "http://127.0.0.1:8000/webstore/"+request_type;
+                $.get(url, {varZip: zip, varShipping: shipping},function (cost) {
                                                      
-                                                     if(cost=="InvalidateZip"){
-                                                     //document.getElementById("ship_cost").value="Please enter a valid zipcode";
-                                                     $('#ship_cost').val("Please enter a valid zipcode");
-                                                     return;
-                                                     }else if(cost==""){
-                                                     return;
-                                                     }
-                                                     $('#ship_cost').val('$'+cost);
-                                                     var subtotal = parseFloat($('#subtotal').val().replace('$', ''));
-                                                     var plusShipping = parseFloat(cost.replace('$', ''));
-                                                     var newTotal = subtotal + plusShipping;
-                                                     
-                                                     if (isNaN(plusShipping))
-                                                     {
-                                                     $('#total_cost').val($('#subtotal').val());
-                                                     }
-                                                     else
-                                                     {
-                                                     $('#total_cost').val('$' + newTotal);
-                                                     
-                                                     $('<script/>', {
-                                                       src: "https://checkout.stripe.com/checkout.js",
-                                                       'class': 'stripe-button',
-                                                       
-                                                       'data-key': "pk_test_uzufHOKwdTefqr8GRf55S7Z4",
-                                                       'data-amount': newTotal * 100,
-                                                       'data-name': "Demo Site",
-                                                       'data-description': '$' + newTotal,
-                                                       'data-image': '/128x128.png'
-                                                       }).appendTo($('#checkout-button-container').empty());
-                                                     }
-                                                     
-                                                     
-                                                     });
-                                               
-                                               })
-                      });
+                    if(cost=="InvalidateZip"){
+                        //document.getElementById("ship_cost").value="Please enter a valid zipcode";
+                        $('#ship_cost').val("Please enter a valid zipcode");
+                        return;
+                    }else if(cost==""){
+                        return;
+                    }
+                    $('#ship_cost').val('$'+cost);
+                    var subtotal = parseFloat($('#subtotal').val().replace('$', ''));
+                    var plusShipping = parseFloat(cost.replace('$', ''));
+                    var newTotal = subtotal + plusShipping;
+                    if (isNaN(plusShipping)){
+                        $('#total_cost').val($('#subtotal').val());
+                    }else{
+                        $('#total_cost').val('$' + newTotal);
+                        $('<script/>', {
+                            src: "https://checkout.stripe.com/checkout.js",
+                            'class': 'stripe-button',
+                            'data-key': "pk_test_uzufHOKwdTefqr8GRf55S7Z4",
+                            'data-amount': newTotal * 100,
+                            'data-name': "Demo Site",
+                            'data-description': '$' + newTotal,
+                            'data-image': '/128x128.png'
+                         }).appendTo($('#checkout-button-container').empty());
+                    }
+                });
+            })
+        });
     </script>
       <!-- </div> -->
       <!-- <div class="modal-footer"> -->
@@ -350,6 +337,7 @@
         <form action="{% url 'payment' %}" method="POST" style="margin-left:25px;" id='checkout-form'>{% csrf_token %}
         	
         	<div id="checkout-button-container">
+                
         	</div>
         	<!--
         	<script
