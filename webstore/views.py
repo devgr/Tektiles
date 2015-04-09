@@ -260,18 +260,21 @@ def payment(request):
 
 	# Get the credit card details submitted by the form
 	token = request.POST['stripeToken']
-	
-	# Slightly ugly, but functional way of getting value from stripe checkout gui
-	cents = int(float(request.POST['amount_in_cents']))
-	
+	# Slightly ugly, but functional way of getting value from stripe checkout gui amount_in_cents
+    #int(float(request.POST['totalprice']))
+	cents = request.POST['totalprice']*100
+	stripeEmail = request.POST['stripeEmail']
 	try:
+        
 		charge = stripe.Charge.create(
 			amount = cents, # amount in cents, again
 			currency = "usd",
 			card = token,
 			# obtain email from database or from webform?
-			description = "payinguser@example.com"
+			description = stripeEmail,
+                                      #"payinguser@example.com"
   		)
+        
 	except stripe.error.CardError, e:
 		# Since it's a decline, stripe.error.CardError will be caught
 		body = e.json_body
@@ -420,7 +423,7 @@ def usps_calculate(request):
     userName = "050TEXTI6311"
     orig_zip = "37167"
     varZip = request.GET['varZip']
-    varShipping = "PRIORITY"#request.GET.get('varShipping')
+    varShipping = request.GET['varShipping']#"PRIORITY"#
     if varZip is None:
         return HttpResponse("")
     else:

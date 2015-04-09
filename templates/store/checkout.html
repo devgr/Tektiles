@@ -21,6 +21,9 @@
 	margin-top:15px;
 	width:200px;
 }
+#total_cost_hide{
+    display: none;
+}
 </style>
 <!--End Changes 11/15 Brandon-->
 
@@ -235,7 +238,7 @@
 		<h4 style="clear:left;">Shipping Details</h4>
 
 		<label class="info_label">Carrier: </label>
-		<select id="ship_carrier" class="selectInfo">
+		<select id="ship_carrier" class="selectInfo" onchange="changeShipping()">
 			<option value="USPS">USPS</option>
             <option selected value="UPS">UPS</option>
 		</select>
@@ -260,7 +263,29 @@
 		<!-- End Changes 11/15 Brandon -->
 
     <script>
+    function changeShipping() {
+        var ship_carrier = $("#ship_carrier").val();
+        if(ship_carrier=="UPS"){
+            document.getElementById("ship_method").innerHTML =
+            '<option value="1DM">Next Day Air Early AM</option>'+
+            '<option value="1DA">Next Day Air</option>'+
+            '<option value="1DP">Next Day Air Saver</option>'+
+            '<option value="2DA">2nd Day Air</option>'+
+            '<option value="3DS">Three Day Select</option>'+
+            '<option selected value="GND">Ground</option>';
+        }else if(ship_carrier=="USPS"){
+            document.getElementById("ship_method").innerHTML =
+            '<option value="PRIORITY MAIL EXPRESS">PRIORITY MAIL EXPRESS</option>'+
+            '<option selected value="PRIORITY">PRIORITY</option>';
+        }else{
+            return;
+        }
+        console.log(document.getElementById("ship_carrier").value)//.innerHTML = "You selected: " + x;
+    }
     $(document).ready(function(){
+                      
+     
+        
         $("#calcShipping").click(function(){
                 var ship_carrier = $("#ship_carrier").val();
                 var request_type = "";
@@ -274,7 +299,7 @@
                 var zip = $("#ship_zipCode").val();
                 //console.log(zip);
                 var shipping = $("#ship_method").val();
-                //console.log(shipping);
+                console.log(shipping);
                                                
                 // Ajax to php server and fill in shipping cost
                                                
@@ -298,11 +323,13 @@
                     $('#ship_cost').val('$'+cost);
                     var subtotal = parseFloat($('#subtotal').val().replace('$', ''));
                     var plusShipping = parseFloat(cost.replace('$', ''));
-                    var newTotal = subtotal + plusShipping;
+                    var newTotal = parseFloat(subtotal + plusShipping).toFixed(2);
                     if (isNaN(plusShipping)){
                         $('#total_cost').val($('#subtotal').val());
+                        $('#total_cost_hide').val($('#subtotal').val());
                     }else{
                         $('#total_cost').val('$' + newTotal);
+                        $('#total_cost_hide').val(newTotal);
                         $('<script/>', {
                             src: "https://checkout.stripe.com/checkout.js",
                             'class': 'stripe-button',
@@ -310,7 +337,7 @@
                             'data-amount': newTotal * 100,
                             'data-name': "Demo Site",
                             'data-description': '$' + newTotal,
-                            'data-image': '/128x128.png'
+                            'data-image': "/128x128.png"
                          }).appendTo($('#checkout-button-container').empty());
                     }
                 });
@@ -336,6 +363,8 @@
 
         <form action="{% url 'payment' %}" method="POST" style="margin-left:25px;" id='checkout-form'>{% csrf_token %}
         	
+            <input type="text" id="total_cost_hide" name="totalprice" class="info" value = ${{ order.totalCost }} readonly />
+            
         	<div id="checkout-button-container">
                 
         	</div>
