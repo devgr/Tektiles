@@ -1,126 +1,134 @@
 {% extends 'base.html' %}
+
+{% block title %}
+    Textile Fabric Consultants
+{% endblock %}
+
 {% block content %}
 
-{% load staticfiles %}
+    {% load staticfiles %}
 
-<script type="text/javascript" src="{% static 'js/FitVids.js-master/jquery.fitvids.js' %}"></script>
-<link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'owl-carousel/owl.carousel.css' %}">
-<link rel="stylesheet" href="{% static 'owl-carousel/owl.theme.css' %}">
-<link rel="stylesheet" href="{% static 'owl-carousel/owl.transitions.css' %}">
-<script src="{% static 'owl-carousel/owl.carousel.js' %}"></script>
-<style type="text/css">
-#id-carousel .owl-item div{
-  background: #3fbf79;
-  padding: 1px 0px;
-  margin-left: 250px;
-  margin-right: 250px;
-  color: #FFF;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-  text-align: center;
-}
+    <script type="text/javascript" src="{% static 'js/FitVids.js-master/jquery.fitvids.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'owl-carousel/owl.carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'owl-carousel/owl.theme.css' %}">
+    <link rel="stylesheet" href="{% static 'owl-carousel/owl.transitions.css' %}">
+    <script src="{% static 'owl-carousel/owl.carousel.js' %}"></script>
+    <style type="text/css">
+     #id-carousel .owl-item div{
+         /* background: #3fbf79; /* debug green */
+		 background: #FFF;
+         padding: 1px 0px;
+         margin-left: 250px;
+         margin-right: 250px;
+         color: #FFF;
+         -webkit-border-radius: 3px;
+         -moz-border-radius: 3px;
+         border-radius: 3px;
+         text-align: center;
+     }
 
-#id-carousel .item img{
-            display: block;
-            width: 100%;
-            height: auto;
-            -webkit-border-radius: 8px;
-            -moz-border-radius: 8px;
-            border-radius: 8px;
-            text-align: center;
-            transitionStyle : "fade";
-            }
+     #id-carousel .item img{
+         display: block;
+         width: 100%;
+         height: auto;
+         -webkit-border-radius: 8px;
+         -moz-border-radius: 8px;
+         border-radius: 8px;
+         text-align: center;
+         transitionStyle : "fade";
+     }
 
-</style>
-	   	<div class="intro-header">
+    </style>
+    <div class="intro-header">
         <div id="id-carousel" class="owl-carousel owl-theme" style="opacity: 1; display: block;">
-                            <div class="item"> <img src="{% static 'logo.jpg' %}"> </div>
-                            <div class="item"> <img src="{% static 'testImage.jpg' %}"> </div>
-                {%for category in items%} 
-                        
-                        {%if category.isFeatured%}  
-                            <div class="item"> <img src="{{category.featured_picture}}"> </div>
-                        {%endif%}
-                          
-                {%endfor%}
-                 </div>   
-                        
-                        
-                        
-  
-        </div>
-
-        <script type="text/javascript">
-        //$(".owl-carousel").owlCarousel();
-        $(document).ready(function(){
-
-        //
-        var owl = $("#id-carousel");
- 
-            owl.owlCarousel({
-                    autoPlay : 10000,
-                    stopOnHover : true,
-                    //navigation:true,
-                    paginationSpeed : 6000,
-                    //goToFirstSpeed : 200,
-                    singleItem : true,
-                    autoHeight : true,
-                    itemsDesktopSmall : [979,3],
-                    transitionStyle : "backSlide"
-                    
-            });
-        });
-        </script>
-        	
-
-        
-
-        <!-- /.container -->
+            <div class="item"> <img src="{% static 'images/carousel/LOGOTFFLAT.jpg' %}"> </div> <!-- 900 x 500 pixels, other images optimal at this res. -->
+            <div class="item"> <img src="{% static 'images/carousel/classy-living-room-interior-design-styles.jpg' %}"> </div>
+            <div class="item"> <img src="{% static 'images/carousel/classic-interior-design-style.jpg' %}"> </div>
+            
+            {%for category in items%} 
                 
+                {%if category.isFeatured%}  
+                    <div class="item"> <img src="{{category.featured_picture}}"> </div>
+                {%endif%}
+                
+            {%endfor%}
+        </div>   
+        
+        
+        
+        
+    </div>
 
-   </div>
+    <script type="text/javascript">
+     //$(".owl-carousel").owlCarousel();
+     $(document).ready(function(){
+
+         //
+         var owl = $("#id-carousel");
+         
+         owl.owlCarousel({
+             autoPlay : 10000,
+             stopOnHover : true,
+             //navigation:true,
+             paginationSpeed : 6000,
+             //goToFirstSpeed : 200,
+             singleItem : true,
+             autoHeight : true,
+             itemsDesktopSmall : [979,3],
+             transitionStyle : "backSlide"
+             
+         });
+     });
+    </script>
+    
+
+    
+
+    <!-- /.container -->
+    
+
+    </div>
     <!-- / .intro-header -->
 
 
 
-<div id="bottomDIV" class="content-section-a">
+    <div id="bottomDIV" class="content-section-a">
 
 	
-    <div class="container">
+        <div class="container">
 
-        <div class="row">
-            <div class="col-lg-5 col-sm-6">
-                <hr class="section-heading-spacer">
-                <div class="clearfix"></div>
-                <h2 class="section-heading">We Are Here To Help.
-                    <br>Contant Us Anytime, Anywhere:</h2>
-                <div class="col-sm-1 hidden-sm">&nbsp;</div>
-                <div class="col-12 col-sm-2 with-hover-text">
-                    <p><a target="_blank" href="tel: (800) 210-9394"><i class="icon icon-phone"></i></a></p>
-                    <span class="hover-text font-light ">(800) 210-9394</span></a>
-                </div>
-                <div class="col-12 col-sm-2 with-hover-text">
-                    <p><a target="_blank" href="mailto:textilefc@textilefabric.com?subject=ContantUs"><i class="icon icon-envelope"></i></a></p>
-                    <span class="hover-text font-light ">textilefc@textilefabric.com</span></a>
-                </div>
-                <div class="col-12 col-sm-2 with-hover-text">
-                    <p><a target="_blank" href="https://www.facebook.com/pages/Textile-Fabric-Consultants-Inc/35559560844"><i class="icon icon-facebook"></i></a></p>
-                    <span class="hover-text font-light ">facebook/textilefabric</span></a>
-                </div>
-                <div class="col-12 col-sm-2 with-hover-text">
-                    <p><a target="_blank" href="#"><i class="icon icon-twitter"></i></a></p>
-                    <span class="hover-text font-light ">@TextileFabric</span></a>
-                </div>
+            <div class="row">
+                <div class="col-lg-5 col-sm-6">
+                    <hr class="section-heading-spacer">
+                    <div class="clearfix"></div>
+                    <h2 class="section-heading">We Are Here To Help.
+                        <br>Contant Us Anytime, Anywhere:</h2>
+                        <div class="col-sm-1 hidden-sm">&nbsp;</div>
+                        <div class="col-12 col-sm-2 with-hover-text">
+                            <p><a target="_blank" href="tel: (800) 210-9394"><i class="icon icon-phone"></i></a></p>
+                            <span class="hover-text font-light ">(800) 210-9394</span></a>
+                        </div>
+                        <div class="col-12 col-sm-2 with-hover-text">
+                            <p><a target="_blank" href="mailto:textilefc@textilefabric.com?subject=ContantUs"><i class="icon icon-envelope"></i></a></p>
+                            <span class="hover-text font-light ">textilefc@textilefabric.com</span></a>
+                        </div>
+                        <div class="col-12 col-sm-2 with-hover-text">
+                            <p><a target="_blank" href="https://www.facebook.com/pages/Textile-Fabric-Consultants-Inc/35559560844"><i style="padding-left:15px;" class="icon icon-facebook"></i></a></p>
+                            <span class="hover-text font-light ">facebook/textilefabric</span></a>
+                        </div>
+                        <div class="col-12 col-sm-2 with-hover-text">
+                            <p><a target="_blank" href="https://twitter.com/TextileFabricCo"><i class="icon icon-twitter"></i></a></p>
+                            <span class="hover-text font-light ">@TextileFabricCo</span></a>
+                        </div>
 
                 </div>
                 <div class="col-lg-5 col-lg-offset-2 col-sm-6">
-                        <h3 class="section-heading">Quality Textile Education Products:<br></h3>
-                        <h4><li>Fabric Swatch Kits</li></h4><br>
-                        <h4><li>Fibers, Fabrics, & Materials</li></h4><br>
-                        <h4><li>Software</li></h4><br>
-                        <h4><li>And more</li></h4><br>
+                    <h3 class="section-heading">Quality Textile Education Products:<br></h3>
+                    <h4><li>Fabric Swatch Kits</li></h4><br>
+                    <h4><li>Fibers, Fabrics, & Materials</li></h4><br>
+                    <h4><li>Software</li></h4><br>
+                    <h4><li>And more</li></h4><br>
                 </div>
             </div>
             
@@ -129,111 +137,121 @@
     </div>
     <!-- /.container -->
 
-</div>
-<!-- /.content-section-a -->
-<script>
+    </div>
+    <!-- /.content-section-a -->
+    <script>
 
-$(document).ready(function(e) {
-    $('.with-hover-text, .regular-link').click(function(e){
-        e.stopPropagation();
-    });
-    
-    /***************
-    * = Hover text *
-    * Hover text for the last slide
-    ***************/
-    $('.with-hover-text').hover(
-        function(e) {
-            $(this).css('overflow', 'visible');
-            $(this).find('.hover-text')
-                .show()
-                .css('opacity', 0)
-                .delay(200)
-                .animate(
-                    {
-                        paddingTop: '25px',
-                        opacity: 1
-                    },
-                    'fast',
-                    'linear'
-                );
-        },
-        function(e) {
-            var obj = $(this);
-            $(this).find('.hover-text')
-                .animate(
-                    {
-                        paddingTop: '0',
-                        opacity: 0
-                    },
-                    'fast',
-                    'linear',
-                    function() {
-                        $(this).hide();
-                        $( obj ).css('overflow', 'hidden');
-                    }
-                );
-        }
-    );
-    
-    var img_loaded = 0;
-    var j_images = [];
-    
-}); 
-
-
-</script>
+     $(document).ready(function(e) {
+         $('.with-hover-text, .regular-link').click(function(e){
+             e.stopPropagation();
+         });
+         
+         /***************
+          * = Hover text *
+          * Hover text for the last slide
+          ***************/
+         $('.with-hover-text').hover(
+             function(e) {
+                 $(this).css('overflow', 'visible');
+                 $(this).find('.hover-text')
+              .show()
+              .css('opacity', 0)
+              .delay(200)
+              .animate(
+                  {
+                      paddingTop: '25px',
+                      opacity: 1
+                  },
+                  'fast',
+                  'linear'
+              );
+             },
+             function(e) {
+                 var obj = $(this);
+                 $(this).find('.hover-text')
+              .animate(
+                  {
+                      paddingTop: '0',
+                      opacity: 0
+                  },
+                  'fast',
+                  'linear',
+                  function() {
+                      $(this).hide();
+                      $( obj ).css('overflow', 'hidden');
+                  }
+              );
+             }
+         );
+         
+         var img_loaded = 0;
+         var j_images = [];
+         
+     }); 
 
 
-<div class="content-section-b">
+    </script>
 
-    <div class="container">
 
-        <div class="row">
-            <div class="col-lg-5 col-lg-offset-1 col-sm-push-6  col-sm-6">
-                <hr class="section-heading-spacer">
-                <div class="clearfix"></div>
-                <h3 class="section-heading">Our Dedicated Staff is Here For You.
-                    <br></h3>
-                <p class="lead">Your experience is important to us. We strive to set the industry standard in service to our customers.</p>
-            </div>
-            
-            <div class="col-lg-5 col-sm-pull-6  col-sm-6">
+<!--
+    <div class="content-section-b">
+
+        <div class="container">
+
+            <div class="row">
+                <div class="col-lg-5 col-lg-offset-1 col-sm-push-6  col-sm-6">
+                    <hr class="section-heading-spacer">
+                    <div class="clearfix"></div>
+                    <h3 class="section-heading">Our Dedicated Staff is Here For You.
+                        <br></h3>
+                        <p class="lead">Your experience is important to us. We strive to set the industry standard in service to our customers.</p>
+                </div>
                 
-                   
-                        <img class="img-responsive" style="border-radius: 8px;"src="{% static 'images/fabricTeam.jpg' %}" alt="">
-                   
-                   </div>
+                <div class="col-lg-5 col-sm-pull-6  col-sm-6">
+                    
+                    
+                    <img class="img-responsive" style="border-radius: 8px;"src="{% static 'images/fabricTeam.jpg' %}" alt="">
+                    
                 </div>
             </div>
         </div>
+    </div>
 
     </div>
     <!-- /.container -->
 
-</div>
-<!-- /.content-section-b -->
+    <!--</div>-->
+    <!-- /.content-section-b -->
+    
 
-<div class="content-section-a">
+    <div class="content-section-b">
 
-    <div class="container">
+        <div class="container">
 
-        <div class="row">
-            <div class="col-lg-5 col-sm-6">
-                <hr class="section-heading-spacer">
-                <div class="clearfix"></div>
-                <h2 class="section-heading">Owner of a Bookstore?
-                    <br>We offer discount pricing.</h2>
-                <p class="lead">Bookstores, colleges/universities, and high schools receive wholesale pricing.</p><p class="lead"> Please email us at textilefc@textilefabric.com, and we'll get you set up.</p>
+            <div class="row">
+                <div class="col-lg-5 col-sm-6">
+                    <hr class="section-heading-spacer">
+                    <div class="clearfix"></div>
+                    <h2 class="section-heading">Owner of a Bookstore?
+                        <br>We offer discount pricing.</h2>
+                        <p class="lead">Bookstores, colleges/universities, and high schools receive wholesale pricing.</p>
+			<p class="lead">
+			    
+			    <!--Begin change by Brandon 11/15-->
+			    <a href="mailto:textilefc@textilefabric.com?subject=Discounts">Email us</a>, and we'll get you set up.</p>
+			<!--End change by Brandon 11/15-->
+			    
+			    </p>
+			    
+                </div>
+                <div class="col-lg-5 col-lg-offset-2 col-sm-6">
+                    <img class="img-responsive" style="border-radius: 8px; width: 350px; height: auto;" src="{% static 'BasicSwatchKit.jpg' %}" alt="">
+                </div>
             </div>
-            <div class="col-lg-5 col-lg-offset-2 col-sm-6">
-                <img class="img-responsive" style="border-radius: 8px; width: 350px; height: auto;" src="{% static 'highschoolkit.jpg' %}" alt="">
-            </div>
+
         </div>
+        <!-- /.container -->
 
     </div>
-    <!-- /.container -->
-
-</div>
-<!-- /.content-section-a -->
+    <!-- /.content-section-b -->
 {% endblock %}

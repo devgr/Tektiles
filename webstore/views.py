@@ -1,9 +1,7 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
-from login.forms import RegistrationForm
-from login.forms import LoginForm
 from webstore.models import StoreItem, StoreCategory, Order, OrderItemCorrect
-from login.models import UserProfile
+from user_management.models import UserProfile
 from django.http import HttpResponse
 from webstore.bing_search import run_query
 import simplejson as json
@@ -12,6 +10,10 @@ from django.forms.models import model_to_dict
 from copy import deepcopy
 from django.core import serializers
 from django.utils import timezone
+from django.conf import settings
+import requests
+import xml.etree.ElementTree as ET
+import re
 
 #### need to initialize the cart here so it is accesible initially
 def webstore(request,id):
@@ -26,7 +28,7 @@ def webstore(request,id):
 		request.session['cartList'] = []
 	initialcart = buildCartDetail(request.session['cartList'])
 	subtotal = getSubtotal(initialcart)
-	return render_to_response('store/shop-homepage.html', {'initialcart':initialcart, 'subtotal':subtotal, 'items': items, 'item_categories': item_categories, 'regform': RegistrationForm(),'loginform': LoginForm()},context)
+	return render_to_response('store/shop-homepage.html', {'initialcart':initialcart, 'subtotal':subtotal, 'items': items, 'item_categories': item_categories},context)
 
 def featured(request):
 	
@@ -34,15 +36,9 @@ def featured(request):
 	items = StoreItem.objects.all()
 	return render_to_response('index.html',{'success': True, 'items': items}, context)
 
-def getImage(request, id, directory, image_name):
-	imagelocation = directory + "/" + image_name
-	print imagelocation
-	image_data = open(imagelocation, "rb").read()
-	return HttpResponse(image_data, mimetype="image/png")
-	
 def home(request):
 	context = RequestContext(request)
-	return render_to_response('store/shop-homepage.html', {'regform': RegistrationForm(),'loginform': LoginForm()},context )
+	return render_to_response('store/shop-homepage.html', {},context )
 
 def searchStore(request):
 	context = RequestContext(request)
@@ -187,8 +183,9 @@ def checkout(request):
 		weight = getWeight(itemsInOrder) # calculate weight if it can be shipped
 	myOrder.totalCost = subtotal + myOrder.shippingCost # shipping cost is figured out at a later point
 	myOrder.save()
-	cents = myOrder.totalCost * 100
-
+	# need to cast as int for stripe to accept it
+	cents = int(myOrder.totalCost * 100)
+	print cents
 
 	return render_to_response('store/checkout.html',{'weight':weight,'boxW':boxDimensions[0],'boxH':boxDimensions[1],'boxD':boxDimensions[2],'needToEmail':needToEmail,'cents':cents,'order':myOrder, 'items':itemsInOrder, 'success': True},context)
 
@@ -252,8 +249,10 @@ def getWeight(itemsInOrder):
 		weight += item.itemID.weightPerItem * item.itemQuantity 
 	return weight
 
+# function call to submit payment information to Strip
 def payment(request):
 	context = RequestContext(request)
+	
 	import stripe
 	# Set your secret key: remember to change this to your live secret key in production
 	# See your keys here https://manage.stripe.com/account
@@ -261,16 +260,21 @@ def payment(request):
 
 	# Get the credit card details submitted by the form
 	token = request.POST['stripeToken']
-	# Slightly ugly, but functional way of getting value from stripe checkout gui
-	cents = int(float(request.POST['amount_in_cents']))
+	# Slightly ugly, but functional way of getting value from stripe checkout gui amount_in_cents
+    #int(float(request.POST['totalprice']))
+	cents = request.POST['totalprice']*100
+	stripeEmail = request.POST['stripeEmail']
 	try:
+        
 		charge = stripe.Charge.create(
-      	amount=cents, # amount in cents, again
-      	currency="usd",
-      	card=token,
-      	description="payinguser@example.com" #need to deal with this
+			amount = cents, # amount in cents, again
+			currency = "usd",
+			card = token,
+			# obtain email from database or from webform?
+			description = stripeEmail,
+                                      #"payinguser@example.com"
   		)
-		pass
+        
 	except stripe.error.CardError, e:
 		# Since it's a decline, stripe.error.CardError will be caught
 		body = e.json_body
@@ -282,24 +286,184 @@ def payment(request):
 		# param is '' in this case
 		print "Param is: %s" % err['param']
 		print "Message is: %s" % err['message']
+		
 	except stripe.error.InvalidRequestError, e:
 		# Invalid parameters were supplied to Stripe's API
 		pass
+	
 	except stripe.error.AuthenticationError, e:
 		# Authentication with Stripe's API failed
 		# (maybe you changed API keys recently)
 		pass
+	
 	except stripe.error.APIConnectionError, e:
 		# Network communication with Stripe failed
 		pass
+	
 	except stripe.error.StripeError, e:
 		# Display a very generic error to the user, and maybe send
 		# yourself an email
 		pass
+	
 	except Exception, e:
 		# Something else happened, completely unrelated to Stripe
 		pass
+	
+	
 	request.session.flush()
 	#return render_to_response('store/shop-homepage.html',{'success' : True},context)
 	#return webstore(request, "Fiber Arts")
 	return redirect('webstore', id='Fiber Arts')
+# ups
+def ups_calculate(request):
+    strAccessLicenseNumber = "CCD014DD4CB4AC62"
+    strUserId = "jgriner0918"
+    strPassword = "From1248"
+    strShipperNumber = "R06535"
+    strShipperZip = "37167"
+    url = "https://www.ups.com/ups.app/xml/Rate"
+    strDefaultServiceCode = "03" #Ground Shipping
+    shippingtype = request.GET['varShipping']
+    if shippingtype == '1DM':
+        strDefaultServiceCode = '14'
+    elif shippingtype == '1DA':
+        strDefaultServiceCode = '01'
+    elif shippingtype == '1DP':
+        strDefaultServiceCode = '13'
+    elif shippingtype == '2DM':
+        strDefaultServiceCode = '59'
+    elif shippingtype == '2DA':
+        strDefaultServiceCode = '02'
+    elif shippingtype == '3DS':
+        strDefaultServiceCode = '12'
+    elif shippingtype == 'GND':
+        strDefaultServiceCode = '03'
+    
+    strDestinationZip = request.GET['varZip']
+    weight = "1"
+    data = """<?xml version=\"1.0\"?>
+        <AccessRequest xml:lang=\"en-US\">
+        <AccessLicenseNumber>%s</AccessLicenseNumber>
+        <UserId>%s</UserId>
+        <Password>%s</Password>
+        </AccessRequest>
+        <?xml version=\"1.0\"?>
+        <RatingServiceSelectionRequest xml:lang=\"en-US\">
+        <Request>
+        <TransactionReference>
+        <CustomerContext>Bare Bones Rate Request</CustomerContext>
+        <XpciVersion>1.0001</XpciVersion>
+        </TransactionReference>
+        <RequestAction>Rate</RequestAction>
+        <RequestOption>Rate</RequestOption>
+        </Request>
+        <PickupType>
+        <Code>01</Code>
+        </PickupType>
+        <Shipment>
+        <Shipper>
+        <Address>
+        <PostalCode>%s</PostalCode>
+        <CountryCode>US</CountryCode>
+        </Address>
+        <ShipperNumber>%s</ShipperNumber>
+        </Shipper>
+        <ShipTo>
+        <Address>
+        <PostalCode>%s</PostalCode>
+        <CountryCode>US</CountryCode>
+        <ResidentialAddressIndicator/>
+        </Address>
+        </ShipTo>
+        <ShipFrom>
+        <Address>
+        <PostalCode>%s</PostalCode>
+        <CountryCode>US</CountryCode>
+        </Address>
+        </ShipFrom>
+        <Service>
+        <Code>%s</Code>
+        </Service>
+        <Package>
+        <PackagingType>
+        <Code>02</Code>
+        </PackagingType>
+        <Dimensions>
+        <UnitOfMeasurement>
+        <Code>IN</Code>
+        </UnitOfMeasurement>
+        <Length>12</Length>
+        <Width>6</Width>
+        <Height>36</Height>
+        </Dimensions>
+        <PackageWeight>
+        <UnitOfMeasurement>
+        <Code>LBS</Code>
+        </UnitOfMeasurement>
+        <Weight>%s</Weight>
+        </PackageWeight>
+        </Package>
+        </Shipment>
+        </RatingServiceSelectionRequest>
+        """ % (strAccessLicenseNumber,strUserId,strPassword,strShipperZip,strShipperNumber,strDestinationZip,strShipperZip,strDefaultServiceCode,weight)
+    r = requests.post(url,data)
+    rate = ""
+    if r.status_code == requests.codes.ok:
+        root = ET.fromstring(r.text)
+        if root is None:
+            rate_value = ""
+        else:
+            rate = root.find('RatedShipment/TotalCharges/MonetaryValue')
+    if rate is None:
+        return HttpResponse("")
+    else:
+        return HttpResponse(rate.text)
+
+def usps_calculate(request):
+    userName = "050TEXTI6311"
+    orig_zip = "37167"
+    varZip = request.GET['varZip']
+    varShipping = request.GET['varShipping']#"PRIORITY"#
+    if varZip is None:
+        return HttpResponse("")
+    else:
+        result = re.match("^[0-9]{5}(?:-[0-9]{4})?$", varZip)
+        if result is None:
+            return HttpResponse("InvalidateZip")
+        else:
+            dest_zip = varZip
+    if varShipping is None:
+        return HttpResponse("InvalidateShipping")
+    else:
+        ship = varShipping
+    weight = "2"
+    url = "http://Production.ShippingAPIs.com/ShippingAPI.dll"
+    data = """API=RateV4&XML=
+        <RateV4Request USERID=\"%s\">
+        <Package ID=\"1ST\">
+        <Service>%s</Service>
+        <ZipOrigination>%s</ZipOrigination>
+        <ZipDestination>%s</ZipDestination>
+        <Pounds>%s</Pounds>
+        <Ounces>0</Ounces>
+        <Container>Variable</Container>
+        <Size>REGULAR</Size>
+        <Length>18</Length>
+        <Height>4</Height>
+        <Girth>12</Girth>
+        <Machinable>TRUE</Machinable>
+        </Package>
+        </RateV4Request>""" % (userName,ship,orig_zip,dest_zip,weight)
+    r = requests.post(url,data)
+    rate = ""
+    if r.status_code == requests.codes.ok:
+        root = ET.fromstring(r.text)
+        if root is None:
+            rate_value = ""
+        else:
+            rate = root.find('Package/Postage/Rate')
+    if rate is None:
+        return HttpResponse("")
+    else:
+        return HttpResponse(rate.text)
+

@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
+
+{% block title %}
+    Store
+{% endblock %}
+
 {% block content %}
 
 
@@ -13,9 +18,10 @@
 <link href="{% static 'css/shop-homepage.css' %}" rel="stylesheet">
 <link href="{% static 'css/magnify.css' %}" rel="stylesheet">
 
- <style>
-      
-      .swing{
+<style>
+
+/*
+.swing{
   animation: animationFrames linear 1s;
   animation-iteration-count: 1;
   transform-origin: 50% 0%;
@@ -168,8 +174,8 @@
   }
 }
 
-
-    </style>
+*/
+</style>
 
 <!-- JS Here -->
 
@@ -185,7 +191,7 @@
 
             <div class="col-md-3">
                 <p class="lead" align="center">Browse Products</p>
-                <div class="list-group" data-spy="affix" data-offset-top="20" id="standard">
+                <div class="list-group" data-spy="" data-offset-top="20" id="standard"> <!-- removed  affix  attribute from data-spy to keep product menu stationary-->
 		                {% for category in item_categories %}
                             <a href="/webstore/category/{{ category }}" class="list-group-item">{{ category }}</a>
                     {% endfor %}
@@ -438,7 +444,7 @@
                         <h4><a data-toggle="modal" data-target="#{{ category.itemNameid }}" style="cursor: pointer;">{{ category.itemName }} </a>
                                 </h4>
 
-                            <img src="{{ category.picture }}" alt="" data-toggle="modal" data-target="#{{ category.itemNameid }}" style="cursor: pointer;">
+                            <img src="/media/{{ category.picture }}" alt="" data-toggle="modal" data-target="#{{ category.itemNameid }}" style="cursor: pointer;">
                            
 
                                 <div class="caption">
@@ -469,7 +475,7 @@
                                                 for(var i = 0; i < result.cart.length; i++){
                                                     console.log("item: " + result.cart[i][0]);
                                                     console.log("item: " + result.cart[i][1]);
-                                                    var bigstring =  "<div class='row individual-item'>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][0] + "</p>" +"</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][1] + "</p>" + "</div>" + "<div class='col-lg-3'>"+ "<input type='text'  placeholder='" + result.cart[i][2] + "' />" + "</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][3] + "</p>" + "</div>" + "</div>";
+                                                    var bigstring =  "<div class='row individual-item'>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][0] + "</p>" +"</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][1] + "</p>" + "</div>" + "<div class='col-lg-3'>"+ "<p align=center> <input type='text' size='3' placeholder='" + result.cart[i][2] + "' /> </p>" + "</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][3] + "</p>" + "</div>" + "</div>";
                                                     $("#cartModalItems").append(bigstring);
                                                     sub += result.cart[i][3]  
                                                 }
@@ -532,7 +538,7 @@
        
    		<div class="row text-center">
             <div class="mag col-sm-3 col-sm-offset-3">
-        		<img data-toggle="magnify"  src="{{ category.picture }}" alt=""><br/>
+        		<img src="/media/{{ category.picture }}" alt=""><br/>	<!-- removed magnify from img tag   data-toggle="magnify"   -->
             </div>
             <script type="text/javascript">
 $(document).ready(function () {
@@ -692,7 +698,7 @@ $(document).ready(function () {
                       for(var i = 0; i < result.cart.length; i++){
                         console.log("item: " + result.cart[i][0]);
                         console.log("item: " + result.cart[i][1]);
-                        var bigstring =  "<div class='row individual-item'>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][0] + "</p>" +"</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][1] + "</p>" + "</div>" + "<div class='col-lg-3'>"+ "<input type='text'  placeholder='" + result.cart[i][2] + "' />" + "</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][3] + "</p>" + "</div>" + "</div>";
+                        var bigstring =  "<div class='row individual-item'>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][0] + "</p>" +"</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][1] + "</p>" + "</div>" + "<div class='col-lg-3'>"+ "<p align=center> <input type='text' size='3' placeholder='" + result.cart[i][2] + "' /> </p>" + "</div>" + "<div class='col-lg-3'>" + "<p align=center>" + result.cart[i][3] + "</p>" + "</div>" + "</div>";
                         $("#cartModalItems").append(bigstring);
                         sub += result.cart[i][3]  
                       }
