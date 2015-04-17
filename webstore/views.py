@@ -266,7 +266,8 @@ def payment(request):
 			amount = cents, # amount in cents, again
 			currency = "usd",
 			card = token,
-			description = "payinguser@example.com"
+			description = "Stripe Charge"
+			
   		)
   		
   		''' optional way to create and save user token for later charging from database
@@ -274,7 +275,11 @@ def payment(request):
   		# Create a Customer
   		customer = stripe.Customer.create(
     		source = token,
-    		description = "Example customer" #replace with our database customer id or email?
+    		description = "Example customer", #replace with our database customer id or email?
+    		# use the email entered on the payment form to send a receipt
+    		# needs to be enabled in the Stripe Dashboard in Stripe Account of Textile
+    		# stripeEmail could also be replaced by the user's email stored in our database
+    		receipt_email = stripeEmail
 		)
 		
 		# Charge the Customer instead of the card
