@@ -4,6 +4,7 @@ from companion.models import Catagories, Topics, Fabrics
 
 class CompanionAdmin(admin.ModelAdmin):
 	pass
+
 # Register your models here.
 admin.site.register(Fabrics, CompanionAdmin)
 admin.site.register(Catagories, CompanionAdmin)

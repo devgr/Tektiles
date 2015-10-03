@@ -16,8 +16,9 @@ PROJECT_PATH = os.path.join(SETTINGS_DIR, os.pardir)
 PROJECT_PATH = os.path.abspath(PROJECT_PATH)
 TEMPLATE_PATH = os.path.join(PROJECT_PATH, 'templates')
 STATIC_PATH = os.path.join(PROJECT_PATH,'static')
-MEDIA_ROOT = os.path.abspath(BASE_DIR)
+MEDIA_ROOT = os.path.join(PROJECT_PATH,'media')
 MEDIA_URL = '/media/'
+LOGIN_URL = '/user/login'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -41,8 +42,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 #Email Settings for account activation
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'pfunk897@gmail.com'
-EMAIL_HOST_PASSWORD = 'Groovy@2'
+EMAIL_HOST_USER = 'hwtechnicalsolutions@gmail.com'  #Do Not Store On GitHub!!!
+EMAIL_HOST_PASSWORD = 'softwareproject'  #No, not this, either.
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
@@ -81,11 +82,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'login',
     'companion',
     'blog',
     'webstore',
     'frontend',
+    'user_management',
     'crispy_forms',
     #'south',
     'endless_pagination',
@@ -95,7 +96,7 @@ INSTALLED_APPS = (
     'annoying',
 )
 #User Profile Settings
-AUTH_PROFILE_MODULE = "login.UserProfile"
+AUTH_PROFILE_MODULE = "user_management.UserProfile"
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

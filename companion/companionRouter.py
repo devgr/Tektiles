@@ -2,7 +2,6 @@ from django.db import connections
 
 class DBRouter(object):
 
-
     def db_for_read(self, model, **hints):
         m = model.__module__.split('.')
         try:
@@ -30,4 +29,3 @@ class DBRouter(object):
         elif db == 'companion':
             return True
         return None
-

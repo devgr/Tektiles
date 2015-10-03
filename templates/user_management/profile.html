@@ -1,0 +1,30 @@
+{% extends 'user_management/base.html' %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main_content %}
+    <h4>
+      Username: {{ request.user.username }}
+      <br>
+      Email: {{ request.user.email }}
+    </h4>
+
+    <ul class="list-unstyled">
+        <li>
+            <a href="/user/order-history">Order History</a>
+        </li>
+    <!--    <li>
+            <a href="/companion/category/Fibers/">Companion App</a>
+        </li>
+    -->
+        <li>
+            <a href="/user/change-email">Change Email</a>
+        </li>
+        <li>
+            <a href="/user/change-password">Change Password</a>
+        </li>
+    </ul>
+
+{% endblock %}

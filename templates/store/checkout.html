@@ -3,6 +3,27 @@
 
 {% load staticfiles %}
 
+<!--Begin Changes 11/15 Brandon-->
+<style>
+.info_label{
+	width:100px;
+	text-align:right;
+	margin-right:15px;
+	margin-top:10px;
+	float:left;
+	clear:left;
+}
+.info{
+	margin-top:10px;
+	width:200px;
+}
+.selectInfo{
+	margin-top:15px;
+	width:200px;
+}
+</style>
+<!--End Changes 11/15 Brandon-->
+
  <div class="modal-header">
         <button type="button" class="btn btn-primary pull-right">Back to Store</button>
 
@@ -42,7 +63,6 @@
                 Add Checkout button to bottom as well as subtotal
           -->
         <!--Everything from here to the next comment is a template for each indivual item. Should be dynamically loaded-->
-
         {% for item in items %}
         <div id="cartModalItems">
           <div class="row individual-item">
@@ -50,55 +70,305 @@
               <p align='center'>{{ item.itemID.itemName }}</p>
             </div>
             <div class="col-lg-3"><!-- Price Per Item-->
-              <p align='center'>{{ item.itemCost }}</p>
+              <p align='center'>${{ item.itemCost }}</p>
             </div>
             <div class="col-lg-3"><!--Quantity (Updatable box)-->
-              <input type="text" placeholder="{{ item.itemQuantity }}">
+			
+			<!--Begin Change 11/21 Brandon -->
+            <p align="center">
+              <input size="2" type="text" placeholder="{{ item.itemQuantity }}">
+			</p>
+            <!--End Change 11/21 Brandon -->
+			
             </div>
             <div class="col-lg-3"><!--Item Total (Price per item * Quantity)-->
-              <p align='center'>{{ item.combinedPrice }}</p>
+              <p align='center'>${{ item.combinedPrice }}</p>
             </div>
           </div>
         </div>
         {% endfor %}
         <!-- End of template for individual item -->
         <hr />
-        <h4>Calculate Shipping</h4>
-        <label style:"margin-right:15px;">Zip code: </label>
-        <input type="text" id="zipCode" style="margin-right:30px;"/>
-        <button id="calcShipping" type="button" class="btn btn-success">Calculate Shipping</button>
+        
+		<!-- Begin Changes 11/13 Brandon -->
+		
+	<form>
+		<h4>Billing Information</h4>
+		<label class="info_label" >First Name: </label>
+        <input type="text" id="bill_Fname" class="info"/>
+		<br>
+		<label class="info_label">Last Name: </label>
+        <input type="text" id="bill_Lname" class="info"/>
+		<br>
+		<label class="info_label">Address: </label>
+        <input type="text" id="bill_addr" class="info"/>
+		<br>
+		<label class="info_label">State: </label>
+        <select id="bill_State" class="info">
+			<option value="AL">Alabama</option>
+			<option value="AK">Alaska</option>
+			<option value="AZ">Arizona</option>
+			<option value="AR">Arkansas</option>
+			<option value="CA">California</option>
+			<option value="CO">Colorado</option>
+			<option value="CT">Connecticut</option>
+			<option value="DE">Delaware</option>
+			<option value="DC">District Of Columbia</option>
+			<option value="FL">Florida</option>
+			<option value="GA">Georgia</option>
+			<option value="HI">Hawaii</option>
+			<option value="ID">Idaho</option>
+			<option value="IL">Illinois</option>
+			<option value="IN">Indiana</option>
+			<option value="IA">Iowa</option>
+			<option value="KS">Kansas</option>
+			<option value="KY">Kentucky</option>
+			<option value="LA">Louisiana</option>
+			<option value="ME">Maine</option>
+			<option value="MD">Maryland</option>
+			<option value="MA">Massachusetts</option>
+			<option value="MI">Michigan</option>
+			<option value="MN">Minnesota</option>
+			<option value="MS">Mississippi</option>
+			<option value="MO">Missouri</option>
+			<option value="MT">Montana</option>
+			<option value="NE">Nebraska</option>
+			<option value="NV">Nevada</option>
+			<option value="NH">New Hampshire</option>
+			<option value="NJ">New Jersey</option>
+			<option value="NM">New Mexico</option>
+			<option value="NY">New York</option>
+			<option value="NC">North Carolina</option>
+			<option value="ND">North Dakota</option>
+			<option value="OH">Ohio</option>
+			<option value="OK">Oklahoma</option>
+			<option value="OR">Oregon</option>
+			<option value="PA">Pennsylvania</option>
+			<option value="RI">Rhode Island</option>
+			<option value="SC">South Carolina</option>
+			<option value="SD">South Dakota</option>
+			<option value="TN">Tennessee</option>
+			<option value="TX">Texas</option>
+			<option value="UT">Utah</option>
+			<option value="VT">Vermont</option>
+			<option value="VA">Virginia</option>
+			<option value="WA">Washington</option>
+			<option value="WV">West Virginia</option>
+			<option value="WI">Wisconsin</option>
+			<option value="WY">Wyoming</option>
+		</select>
+		<br>
+		<label class="info_label">Zip code: </label>
+        <input type="text" id="bill_zipCode" class="info"/>
+        
+        <!-- Check box and Function to copy Billing information to Shipping information -->
+	<br><br>
+
+	<input type="checkbox" name="copybilling" onclick="CopyShipping(this.form)">
+	<em>Check this box if your Billing Address and Shipping Address are the same.</em>
+	
+	<script>	
+	function CopyShipping(f) 
+	{
+		if(f.copybilling.checked == true)
+  		{
+    			f.ship_Fname.value = f.bill_Fname.value;
+    			f.ship_Lname.value = f.bill_Lname.value;
+    			f.ship_addr.value = f.bill_addr.value;
+    			f.ship_State.value = f.bill_State.value;
+    			f.ship_zipCode.value = f.bill_zipCode.value;
+  		}
+	}
+	</script>
+		
+		<hr>
+		
+		<h4 style="clear:left;">Shipping Information</h4>
+		
+		<label class="info_label">First Name: </label>
+        <input type="text" id="ship_Fname" class="info"/>
+		<br>
+		<label class="info_label">Last Name: </label>
+        <input type="text" id="ship_Lname" class="info"/>
+		<br>
+		<label class="info_label">Address: </label>
+        <input type="text" id="ship_addr" class="info"/>
+		<br>
+		<label class="info_label">State: </label>
+        <select id="ship_State" class="info">
+			<option value="AL">Alabama</option>
+			<option value="AK">Alaska</option>
+			<option value="AZ">Arizona</option>
+			<option value="AR">Arkansas</option>
+			<option value="CA">California</option>
+			<option value="CO">Colorado</option>
+			<option value="CT">Connecticut</option>
+			<option value="DE">Delaware</option>
+			<option value="DC">District Of Columbia</option>
+			<option value="FL">Florida</option>
+			<option value="GA">Georgia</option>
+			<option value="HI">Hawaii</option>
+			<option value="ID">Idaho</option>
+			<option value="IL">Illinois</option>
+			<option value="IN">Indiana</option>
+			<option value="IA">Iowa</option>
+			<option value="KS">Kansas</option>
+			<option value="KY">Kentucky</option>
+			<option value="LA">Louisiana</option>
+			<option value="ME">Maine</option>
+			<option value="MD">Maryland</option>
+			<option value="MA">Massachusetts</option>
+			<option value="MI">Michigan</option>
+			<option value="MN">Minnesota</option>
+			<option value="MS">Mississippi</option>
+			<option value="MO">Missouri</option>
+			<option value="MT">Montana</option>
+			<option value="NE">Nebraska</option>
+			<option value="NV">Nevada</option>
+			<option value="NH">New Hampshire</option>
+			<option value="NJ">New Jersey</option>
+			<option value="NM">New Mexico</option>
+			<option value="NY">New York</option>
+			<option value="NC">North Carolina</option>
+			<option value="ND">North Dakota</option>
+			<option value="OH">Ohio</option>
+			<option value="OK">Oklahoma</option>
+			<option value="OR">Oregon</option>
+			<option value="PA">Pennsylvania</option>
+			<option value="RI">Rhode Island</option>
+			<option value="SC">South Carolina</option>
+			<option value="SD">South Dakota</option>
+			<option value="TN">Tennessee</option>
+			<option value="TX">Texas</option>
+			<option value="UT">Utah</option>
+			<option value="VT">Vermont</option>
+			<option value="VA">Virginia</option>
+			<option value="WA">Washington</option>
+			<option value="WV">West Virginia</option>
+			<option value="WI">Wisconsin</option>
+			<option value="WY">Wyoming</option>
+		</select>		
+		<br>
+		<label class="info_label">Zip code: </label>
+        <input type="text" id="ship_zipCode" class="info"/>
+        
+        </form>
+		
+		<hr/>
+		<h4 style="clear:left;">Shipping Details</h4>
+
+		<label class="info_label">Carrier: </label>
+		<select id="ship_carrier" class="selectInfo">
+			<option value="USPS">USPS</option>
+            <option selected value="UPS">UPS</option>
+		</select>
+
+		<br>
+
+		<label class="info_label">Shipping Type: </label>
+		<select id="ship_method" class="selectInfo">
+			<option value="1DM">Next Day Air Early AM</option>
+            <option value="1DA">Next Day Air</option>
+            <option value="1DP">Next Day Air Saver</option>                            
+            <!-- <option value="2DM">2nd Day Air AM</option> // this one not working -->
+            <option value="2DA">2nd Day Air</option>
+            <option value="3DS">Three Day Select</option>                            
+            <option selected value="GND">Ground</option>
+		</select>
+
+		<br>
+		<br>
+		
+		<button id="calcShipping" type="button" class="btn btn-success" style="margin-left:25px;">Calculate Shipping</button>
+		<!-- End Changes 11/15 Brandon -->
 
         <script>
           $(document).ready(function(){
             $("#calcShipping").click(function(){
-              var zip = $("#zipCode").val();
+              var zip = $("#ship_zipCode").val();
               console.log(zip);
 
+              var shipping = $("#ship_method").val();
+              console.log(shipping);
+
               // Ajax to php server and fill in shipping cost
+
+              // this is a temporary version that calls the php script from a different domain, the php script should eventually
+              // be rewritten in python and be handled in Django, this just gives a real result in the meantime
+
+              if (zip=="") 
+               {
+			    document.getElementById("ship_cost").value="Please enter a valid zipcode";
+			    return;
+			  } 
+
+			  $.get("http://127.0.0.1:8888/UPS_Calculator/externalUPS.php", {varZip: zip, varShipping: shipping}, 
+			  	function (cost) {
+			  		$('#ship_cost').val(cost);
+			  		var subtotal = parseFloat($('#subtotal').val().replace('$', ''));
+			  		var plusShipping = parseFloat(cost.replace('$', ''));
+			  		var newTotal = subtotal + plusShipping;
+
+			  		if (isNaN(plusShipping)) 
+			  		{
+			  			$('#total_cost').val($('#subtotal').val());
+			  		}
+			  		else
+			  		{
+			  			$('#total_cost').val('$' + newTotal);
+
+			  			$('<script/>', {
+			  				src: "https://checkout.stripe.com/checkout.js",
+			  				'class': 'stripe-button',
+
+            				'data-key': "pk_test_uzufHOKwdTefqr8GRf55S7Z4",
+            				'data-amount': newTotal * 100,
+            				'data-name': "Demo Site",
+            				'data-description': '$' + newTotal,
+            				'data-image': '/128x128.png'
+			  			}).appendTo($('#checkout-button-container').empty());
+			  		}
+
+
+			  	});
+
             })
           });
         </script>
-      </div>
-      <div class="modal-footer">
-        <p>Subtotal:
-        {{ order.totalCost }}</p><!--Subtotal goes here-->
-        <p id="shippingCost">Shipping cost:</p>
-        <br>
-        <h5 id="totalCost">Total:</h5>
+      <!-- </div> -->
+      <!-- <div class="modal-footer"> -->
+      <!-- <div> -->
+      	<hr>
+      	<h4 style="clear:left;">Totals</h4>
+      	<label class="info_label">Subtotal: </label>
+      	<input type="text" id="subtotal" class="info" value = ${{ order.totalCost }} readonly/> <!--Subtotal goes here-->
+      	<br>
+      	<label class="info_label" id="shippingCost">Shipping Cost: </label>
+      	<input type="text" id="ship_cost" class="info" readonly /> <!--Calculated via shipping calc-->
+      	<br>
+      	<br>
+      	<h5 class="info_label" id="totalCost">Total: </h5>
+      	<input type="text" id="total_cost" class="info" value = ${{ order.totalCost }} readonly /> <!--Subtotal goes here-->
+      	<br>
+      	<br>
 
-        <form action="{% url 'payment' %}" method="POST">{% csrf_token %}
-          <script
-            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-            data-key="pk_test_uzufHOKwdTefqr8GRf55S7Z4"
-            data-amount= {{ cents }}
-            data-name="Demo Site"
-            data-description= {{ order.totalCost }}
-            data-image="/128x128.png">
-            // rewrite this script element with javascript with the right cents ammount after shipping
-          </script>
-  		    <!-- temporary ugly way of sending cents -->
-  		    <input type="hidden" name="amount_in_cents" value = {{ cents }} id="cents">
-
+        <form action="{% url 'payment' %}" method="POST" style="margin-left:25px;" id='checkout-form'>{% csrf_token %}
+        	
+        	<div id="checkout-button-container">
+        	</div>
+        	
+        	<script
+        		src = "https://checkout.stripe.com/checkout.js" class="stripe-button"
+            		id = "stripe-script"
+            		data-key = "pk_test_uzufHOKwdTefqr8GRf55S7Z4"
+            		data-amount = {{ cents }}
+            		data-name = "Textile Fabric Consultants"
+            		data-description = "Total Cost: " {{ order.totalCost }}
+            		data-image = "/128x128.png"	>
+            		// rewrite this script element with javascript with the right cents ammount after shipping
+            	</script>
+  		    <!-- temporary ugly way of sending cents - ->
+  		    <input type="hidden" name="amount_in_cents" value = {{ cents }} id="cents">-->
         </form>
 
         

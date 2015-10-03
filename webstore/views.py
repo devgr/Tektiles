@@ -1,9 +1,7 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
-from login.forms import RegistrationForm
-from login.forms import LoginForm
 from webstore.models import StoreItem, StoreCategory, Order, OrderItemCorrect
-from login.models import UserProfile
+from user_management.models import UserProfile
 from django.http import HttpResponse
 from webstore.bing_search import run_query
 import simplejson as json
@@ -12,6 +10,7 @@ from django.forms.models import model_to_dict
 from copy import deepcopy
 from django.core import serializers
 from django.utils import timezone
+from django.conf import settings
 
 #### need to initialize the cart here so it is accesible initially
 def webstore(request,id):
@@ -26,7 +25,7 @@ def webstore(request,id):
 		request.session['cartList'] = []
 	initialcart = buildCartDetail(request.session['cartList'])
 	subtotal = getSubtotal(initialcart)
-	return render_to_response('store/shop-homepage.html', {'initialcart':initialcart, 'subtotal':subtotal, 'items': items, 'item_categories': item_categories, 'regform': RegistrationForm(),'loginform': LoginForm()},context)
+	return render_to_response('store/shop-homepage.html', {'initialcart':initialcart, 'subtotal':subtotal, 'items': items, 'item_categories': item_categories},context)
 
 def featured(request):
 	
@@ -34,15 +33,9 @@ def featured(request):
 	items = StoreItem.objects.all()
 	return render_to_response('index.html',{'success': True, 'items': items}, context)
 
-def getImage(request, id, directory, image_name):
-	imagelocation = directory + "/" + image_name
-	print imagelocation
-	image_data = open(imagelocation, "rb").read()
-	return HttpResponse(image_data, mimetype="image/png")
-	
 def home(request):
 	context = RequestContext(request)
-	return render_to_response('store/shop-homepage.html', {'regform': RegistrationForm(),'loginform': LoginForm()},context )
+	return render_to_response('store/shop-homepage.html', {},context )
 
 def searchStore(request):
 	context = RequestContext(request)
@@ -187,8 +180,9 @@ def checkout(request):
 		weight = getWeight(itemsInOrder) # calculate weight if it can be shipped
 	myOrder.totalCost = subtotal + myOrder.shippingCost # shipping cost is figured out at a later point
 	myOrder.save()
-	cents = myOrder.totalCost * 100
-
+	# need to cast as int for stripe to accept it
+	cents = int(myOrder.totalCost * 100)
+	print cents
 
 	return render_to_response('store/checkout.html',{'weight':weight,'boxW':boxDimensions[0],'boxH':boxDimensions[1],'boxD':boxDimensions[2],'needToEmail':needToEmail,'cents':cents,'order':myOrder, 'items':itemsInOrder, 'success': True},context)
 
@@ -252,8 +246,10 @@ def getWeight(itemsInOrder):
 		weight += item.itemID.weightPerItem * item.itemQuantity 
 	return weight
 
+# function call to submit payment information to Strip
 def payment(request):
 	context = RequestContext(request)
+	
 	import stripe
 	# Set your secret key: remember to change this to your live secret key in production
 	# See your keys here https://manage.stripe.com/account
@@ -261,16 +257,54 @@ def payment(request):
 
 	# Get the credit card details submitted by the form
 	token = request.POST['stripeToken']
+	
 	# Slightly ugly, but functional way of getting value from stripe checkout gui
 	cents = int(float(request.POST['amount_in_cents']))
+	
 	try:
 		charge = stripe.Charge.create(
-      	amount=cents, # amount in cents, again
-      	currency="usd",
-      	card=token,
-      	description="payinguser@example.com" #need to deal with this
+			amount = cents, # amount in cents, again
+			currency = "usd",
+			card = token,
+			description = "Stripe Charge"
+			
   		)
-		pass
+  		
+  		''' optional way to create and save user token for later charging from database
+  	
+  		# Create a Customer
+  		customer = stripe.Customer.create(
+    		source = token,
+    		description = "Example customer", #replace with our database customer id or email?
+    		# use the email entered on the payment form to send a receipt
+    		# needs to be enabled in the Stripe Dashboard in Stripe Account of Textile
+    		# stripeEmail could also be replaced by the user's email stored in our database
+    		receipt_email = stripeEmail
+		)
+		
+		# Charge the Customer instead of the card
+		stripe.Charge.create(
+		amount = cents,
+		currency = "usd",
+		customer=customer.id
+		)
+		
+		# Save the customer ID in your database so you can use it later
+		save_stripe_customer_id(user, customer.id)
+		
+		# Later... possibly implement through admin so admin can charge using saved info
+		customer_id = get_stripe_customer_id(user)
+
+		stripe.Charge.create(
+		# (admin can enter desired amount to charge client in a form submission?)
+    		amount=1500, # $15.00 this time (replace with variable captured with form
+    		currency="usd",
+    		customer=customer_id
+		)
+		
+		'''
+  		
+  		
 	except stripe.error.CardError, e:
 		# Since it's a decline, stripe.error.CardError will be caught
 		body = e.json_body
@@ -282,23 +316,30 @@ def payment(request):
 		# param is '' in this case
 		print "Param is: %s" % err['param']
 		print "Message is: %s" % err['message']
+		
 	except stripe.error.InvalidRequestError, e:
 		# Invalid parameters were supplied to Stripe's API
 		pass
+	
 	except stripe.error.AuthenticationError, e:
 		# Authentication with Stripe's API failed
 		# (maybe you changed API keys recently)
 		pass
+	
 	except stripe.error.APIConnectionError, e:
 		# Network communication with Stripe failed
 		pass
+	
 	except stripe.error.StripeError, e:
 		# Display a very generic error to the user, and maybe send
 		# yourself an email
 		pass
+	
 	except Exception, e:
 		# Something else happened, completely unrelated to Stripe
 		pass
+	
+	
 	request.session.flush()
 	#return render_to_response('store/shop-homepage.html',{'success' : True},context)
 	#return webstore(request, "Fiber Arts")

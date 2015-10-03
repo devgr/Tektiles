@@ -4,27 +4,18 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from login.forms import RegistrationForm
-from login.forms import LoginForm
 from webstore.models import StoreItem
+from django.conf import settings
 
 def index(request):
     context = RequestContext(request)
     items = StoreItem.objects.all()
-    return render_to_response('index.html', {'items': items,'regform': RegistrationForm(),'loginform': LoginForm()},context )
-
-def getImage(request, directory, image_name):
-    imagelocation = directory + "/" + image_name
-    print imagelocation
-    image_data = open(imagelocation, "rb").read()
-    return HttpResponse(image_data, mimetype="image/png")
+    return render_to_response('index.html', {'items': items}, context )
 
 def about(request):
 	context = RequestContext(request)
-	return render_to_response('about.html', {'regform': RegistrationForm(),'loginform': LoginForm()},context)
-
+	return render_to_response('about.html', {}, context)
 
 
 @csrf_exempt
@@ -38,11 +29,7 @@ def contact(request):
         email = request.POST.get('email')
         comments = request.POST.get('comments')
         content = "Name: " + str(last) + "," + str(first)  + "Phone: " + str(phone)  + "Email: " + str(email)  + "Comments: " + str(comments)
-        
-        sendemail = [ "pfunk897@gmail.com" ] 
-
-        send_mail(title, content, 'no-reply@gsick.com', sendemail, fail_silently=False)
+        sendemail = [ "hwtechnicalsolutions@gmail.com" ] 
+        send_mail(title, content, settings.EMAIL_HOST_USER, sendemail, fail_silently=False)
         return render_to_response('contact.html',{'success':True},context)
     return render_to_response('contact.html',context)
-
-
